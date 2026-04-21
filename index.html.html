@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAIM Marcas e Domínios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:   #18253c;
+  --navy2:  #1f3352;
+  --green:  #3aaa62;
+  --green2: #2e9254;
+  --green3: #1a6640;
+  --gray:   #9aa5b4;
+  --white:  #ffffff;
+  --offwhite: #f5f6f8;
+  --offwhite2: #eef0f4;
+  --text:   #18253c;
+  --muted:  #5a6a7e;
+  --border: #dde3ea;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--text); overflow-x: hidden; cursor: none; }
+
+/* CURSOR */
+.cur  { width:8px; height:8px; background:var(--green); border-radius:50%; position:fixed; top:0;left:0; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); }
+.curR { width:26px; height:26px; border:1.5px solid rgba(58,170,98,.4); border-radius:50%; position:fixed; top:0;left:0; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition: left .08s, top .08s; }
+
+/* REVEAL */
+.rv { opacity:0; transform:translateY(24px); transition:opacity .65s cubic-bezier(.16,1,.3,1), transform .65s cubic-bezier(.16,1,.3,1); }
+.rv.on { opacity:1; transform:translateY(0); }
+.d1{transition-delay:.08s} .d2{transition-delay:.16s} .d3{transition-delay:.24s} .d4{transition-delay:.32s}
+
+/* LOGO SYMBOL */
+.sym { display:flex; flex-direction:column; gap:3px; }
+.sym-bar { border-radius:0 50% 50% 0; }
+
+/* NAV */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  height:68px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 64px;
+  background:rgba(255,255,255,.94); backdrop-filter:blur(20px);
+  border-bottom:0.5px solid var(--border);
+  transition:box-shadow .3s;
+}
+nav.raised { box-shadow:0 2px 20px rgba(0,0,0,.06); }
+.nlogo { display:flex; align-items:center; gap:11px; text-decoration:none; }
+.nsep  { width:1px; height:28px; background:var(--border); }
+.nname { font-family:'Inter', sans-serif; font-size:20px; font-weight:800; color:var(--navy); letter-spacing:.02em; }
+.ntag  { font-family:'Playfair Display', serif; font-style:italic; font-size:8px; color:var(--green); letter-spacing:.04em; margin-top:1px; }
+.nlinks { display:flex; align-items:center; gap:32px; }
+.nlinks a { font-size:13px; font-weight:500; color:var(--muted); text-decoration:none; transition:color .2s; letter-spacing:.01em; }
+.nlinks a:hover { color:var(--navy); }
+.ncta {
+  background:var(--navy); color:var(--white) !important;
+  padding:10px 22px; border-radius:8px; font-weight:700 !important;
+  font-size:13px !important; letter-spacing:.02em !important;
+  transition:background .2s !important;
+}
+.ncta:hover { background:var(--navy2) !important; }
+
+/* HERO */
+#hero {
+  min-height:100vh; display:flex; align-items:center;
+  padding:110px 64px 80px;
+  background:var(--offwhite);
+  position:relative; overflow:hidden;
+}
+.hero-sym {
+  position:absolute; right:-60px; top:50%; transform:translateY(-50%);
+  opacity:.03; pointer-events:none;
+  display:flex; flex-direction:column; gap:20px;
+}
+.hero-sym-bar { border-radius:0 50% 50% 0; background:var(--navy); }
+
+.hcol { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; width:100%; }
+
+.hbadge {
+  display:inline-flex; align-items:center; gap:7px;
+  background:rgba(58,170,98,.08); border:0.5px solid rgba(58,170,98,.3);
+  padding:6px 14px; border-radius:6px;
+  font-size:11px; font-weight:600; color:var(--green2);
+  letter-spacing:.12em; text-transform:uppercase; margin-bottom:28px;
+}
+.hbadge-dot { width:5px; height:5px; border-radius:50%; background:var(--green); animation:blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+h1 {
+  font-family:'Playfair Display', serif;
+  font-size:clamp(44px,5.5vw,72px); font-weight:900;
+  line-height:1.06; letter-spacing:-.02em; color:var(--navy);
+}
+h1 em { font-style:italic; color:var(--green); }
+.hsub {
+  font-family:'Inter', sans-serif; font-size:16px; font-weight:400;
+  color:var(--muted); line-height:1.8; margin-top:22px; max-width:460px;
+}
+.hfor { display:flex; gap:7px; flex-wrap:wrap; margin-top:22px; }
+.hpill {
+  background:var(--white); border:0.5px solid var(--border);
+  padding:5px 13px; border-radius:20px;
+  font-size:11px; font-weight:500; color:var(--muted); letter-spacing:.01em;
+}
+.hact { display:flex; gap:12px; margin-top:38px; }
+.btn-primary {
+  background:var(--green); color:var(--white);
+  padding:14px 30px; border-radius:8px;
+  font-size:13.5px; font-weight:700; text-decoration:none; letter-spacing:.01em;
+  transition:background .2s, transform .15s;
+}
+.btn-primary:hover { background:var(--green2); transform:translateY(-1px); }
+.btn-secondary {
+  background:var(--white); color:var(--navy);
+  padding:14px 30px; border-radius:8px;
+  font-size:13.5px; font-weight:600; text-decoration:none; letter-spacing:.01em;
+  border:0.5px solid var(--border); transition:border-color .2s, transform .15s;
+}
+.btn-secondary:hover { border-color:var(--navy); transform:translateY(-1px); }
+
+/* HERO VISUAL */
+.hvisual {
+  background:var(--white); border:0.5px solid var(--border);
+  border-radius:16px; padding:36px 32px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.hv-title {
+  font-family:'Inter', sans-serif;
+  font-size:10px; font-weight:700; color:var(--muted);
+  letter-spacing:.18em; text-transform:uppercase; margin-bottom:6px;
+}
+.hv-item {
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--offwhite); border-radius:10px; padding:13px 15px;
+  border:0.5px solid var(--border); transition:border-color .2s;
+}
+.hv-item:hover { border-color:var(--green); }
+.hv-left { display:flex; align-items:center; gap:11px; }
+.hv-icon { width:34px; height:34px; border-radius:8px; background:var(--navy); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.hv-icon svg { width:15px; height:15px; }
+.hv-name { font-size:13.5px; font-weight:700; color:var(--navy); }
+.hv-desc { font-size:11px; color:var(--muted); margin-top:1px; }
+.hv-badge { font-size:10px; font-weight:600; padding:4px 10px; border-radius:5px; white-space:nowrap; letter-spacing:.04em; }
+.hv-badge.ok { background:rgba(58,170,98,.08); color:var(--green2); }
+.hv-badge.go { background:rgba(24,37,60,.06); color:var(--navy); }
+.hv-note { font-size:10.5px; color:var(--muted); text-align:center; margin-top:6px; font-style:italic; font-family:'Playfair Display', serif; }
+
+/* STATS BAR */
+.stats-bar {
+  background:var(--navy); padding:30px 64px;
+  display:grid; grid-template-columns:repeat(4,1fr);
+}
+.sb-item { display:flex; flex-direction:column; align-items:center; padding:0 20px; }
+.sb-item + .sb-item { border-left:0.5px solid rgba(255,255,255,.1); }
+.sb-n {
+  font-family:'Playfair Display', serif;
+  font-size:34px; font-weight:900; color:var(--green); line-height:1;
+}
+.sb-l { font-size:11.5px; color:rgba(255,255,255,.4); margin-top:5px; font-weight:400; letter-spacing:.01em; }
+
+/* SECTIONS */
+.sec { padding:96px 64px; }
+.sec-light  { background:var(--offwhite); }
+.sec-white  { background:var(--white); }
+.sec-dark   { background:var(--navy); }
+
+.label {
+  font-family:'Inter', sans-serif;
+  font-size:10px; font-weight:700; color:var(--green);
+  letter-spacing:.22em; text-transform:uppercase; margin-bottom:12px;
+  display:flex; align-items:center; gap:8px;
+}
+.label::before { content:''; width:20px; height:2px; background:var(--green); border-radius:1px; }
+
+h2 {
+  font-family:'Playfair Display', serif;
+  font-size:clamp(30px,3.5vw,46px); font-weight:900;
+  line-height:1.1; letter-spacing:-.015em;
+}
+h2.dark  { color:var(--navy); }
+h2.white { color:var(--white); }
+h2 em    { font-style:italic; color:var(--green); }
+.sub-text {
+  font-family:'Inter', sans-serif;
+  font-size:15px; color:var(--muted); line-height:1.8;
+  margin-top:14px; max-width:520px; font-weight:400;
+}
+.sub-text-w { color:rgba(255,255,255,.5); }
+
+/* FOR WHO */
+.fw-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:52px; }
+.fw-card {
+  background:var(--white); border:0.5px solid var(--border);
+  border-radius:12px; padding:24px 20px;
+  transition:all .25s;
+}
+.fw-card:hover { border-color:var(--green); transform:translateY(-3px); }
+.fw-ic {
+  width:38px; height:38px; border-radius:9px;
+  background:var(--offwhite); border:0.5px solid var(--border);
+  display:flex; align-items:center; justify-content:center; margin-bottom:14px;
+}
+.fw-ic svg { width:17px; height:17px; }
+.fw-t { font-size:14px; font-weight:700; color:var(--navy); margin-bottom:5px; }
+.fw-d { font-size:12px; color:var(--muted); line-height:1.65; }
+
+/* SERVICES */
+.srv-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:52px; }
+.srv-card {
+  background:var(--white); border:0.5px solid var(--border);
+  border-radius:14px; padding:36px 32px;
+  transition:all .25s; position:relative; overflow:hidden;
+}
+.srv-accent {
+  position:absolute; top:0;left:0;right:0; height:2px;
+  background:var(--green); transform:scaleX(0); transform-origin:left; transition:transform .35s;
+}
+.srv-card:hover { box-shadow:0 16px 48px rgba(0,0,0,.06); transform:translateY(-3px); }
+.srv-card:hover .srv-accent { transform:scaleX(1); }
+.srv-card.highlight { background:var(--navy); border-color:var(--navy); }
+.srv-card.highlight .srv-title { color:var(--white); }
+.srv-card.highlight .srv-desc  { color:rgba(255,255,255,.5); }
+.srv-card.highlight .srv-inc li { color:rgba(255,255,255,.5); }
+.srv-card.highlight .srv-inc li::before { background:var(--green); }
+.srv-card.highlight .srv-note { color:rgba(255,255,255,.28); border-color:rgba(255,255,255,.1); }
+.srv-card.highlight .srv-cta { color:var(--green); }
+
+.srv-tag {
+  display:inline-block; font-size:10px; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase;
+  padding:4px 10px; border-radius:5px; margin-bottom:18px;
+}
+.srv-tag.green { background:rgba(58,170,98,.08); color:var(--green2); }
+.srv-tag.dark  { background:rgba(255,255,255,.08); color:rgba(255,255,255,.65); }
+.srv-title { font-family:'Playfair Display', serif; font-size:20px; font-weight:900; color:var(--navy); margin-bottom:8px; }
+.srv-desc  { font-size:13px; color:var(--muted); line-height:1.75; }
+.srv-inc { list-style:none; margin-top:18px; display:flex; flex-direction:column; gap:7px; }
+.srv-inc li { font-size:12.5px; color:var(--muted); padding-left:14px; position:relative; }
+.srv-inc li::before { content:''; position:absolute; left:0; top:7px; width:5px; height:5px; border-radius:50%; background:var(--green); }
+.srv-note { margin-top:20px; padding-top:16px; border-top:0.5px solid var(--border); font-size:11px; color:var(--muted); line-height:1.65; font-style:italic; font-family:'Playfair Display', serif; }
+.srv-cta { display:inline-flex; align-items:center; gap:6px; margin-top:18px; font-size:13px; font-weight:700; color:var(--green2); text-decoration:none; transition:gap .2s; letter-spacing:.01em; }
+.srv-cta:hover { gap:10px; }
+
+/* HOW */
+.how-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:0; margin-top:56px; position:relative; }
+.how-grid::before { content:''; position:absolute; top:23px; left:12.5%; right:12.5%; height:0.5px; background:var(--border); }
+.how-step { text-align:center; padding:0 16px; position:relative; z-index:1; }
+.how-n {
+  width:46px; height:46px; border-radius:50%;
+  background:var(--white); border:0.5px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto 20px;
+  font-family:'Playfair Display', serif; font-size:17px; font-weight:700; color:var(--navy);
+  transition:all .25s;
+}
+.how-step:hover .how-n { background:var(--green); border-color:var(--green); color:var(--white); }
+.how-t { font-size:14px; font-weight:700; color:var(--navy); margin-bottom:7px; }
+.how-d { font-size:12px; color:var(--muted); line-height:1.65; }
+
+/* DIGITAL */
+.dig-inner { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+.dig-list { display:flex; flex-direction:column; gap:18px; margin-top:32px; }
+.dig-item { display:flex; gap:14px; align-items:flex-start; }
+.dig-ck { width:22px; height:22px; border-radius:6px; background:rgba(58,170,98,.1); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
+.dig-ck svg { width:11px; height:11px; }
+.dig-it { font-size:14px; font-weight:700; color:var(--navy); margin-bottom:2px; }
+.dig-id { font-size:12.5px; color:var(--muted); line-height:1.65; }
+
+.dig-card {
+  background:var(--white); border:0.5px solid var(--border);
+  border-radius:16px; padding:32px 28px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.dig-card-title { font-size:10px; font-weight:700; color:var(--muted); letter-spacing:.18em; text-transform:uppercase; margin-bottom:8px; }
+.dc-item {
+  display:flex; align-items:center; gap:12px;
+  background:var(--offwhite); border:0.5px solid var(--border);
+  border-radius:9px; padding:12px 14px; transition:border-color .2s;
+}
+.dc-item:hover { border-color:var(--green); }
+.dc-dot { width:6px; height:6px; border-radius:50%; background:var(--green); flex-shrink:0; }
+.dc-t { font-size:13px; font-weight:700; color:var(--navy); }
+.dc-s { font-size:10.5px; color:var(--muted); margin-top:1px; }
+.dc-ok { margin-left:auto; }
+.dc-ok svg { width:14px; height:14px; }
+
+/* TESTIMONIALS */
+.tgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:52px; }
+.tc {
+  background:var(--white); border:0.5px solid var(--border);
+  border-radius:12px; padding:28px 24px; transition:all .25s;
+}
+.tc:hover { border-color:var(--green); transform:translateY(-3px); }
+.tc-stars { color:var(--green); font-size:12px; letter-spacing:3px; margin-bottom:14px; }
+.tc-text {
+  font-family:'Playfair Display', serif; font-style:italic;
+  font-size:14px; color:var(--muted); line-height:1.8; margin-bottom:18px;
+}
+.tc-author { display:flex; align-items:center; gap:10px; }
+.tc-av {
+  width:34px; height:34px; border-radius:50%;
+  background:var(--offwhite2); border:0.5px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:800; color:var(--navy); flex-shrink:0;
+}
+.tc-name { font-size:12.5px; font-weight:700; color:var(--navy); }
+.tc-role { font-size:10.5px; color:var(--muted); }
+
+/* FAQ */
+.faq-wrap { max-width:660px; margin:52px auto 0; }
+.fq { border-bottom:0.5px solid var(--border); }
+.fqb {
+  width:100%; background:none; border:none; text-align:left;
+  padding:20px 0; font-family:'Inter',sans-serif; font-size:14.5px;
+  font-weight:600; color:var(--navy); cursor:pointer;
+  display:flex; justify-content:space-between; align-items:center; gap:16px;
+  transition:color .2s; letter-spacing:.005em;
+}
+.fqb:hover { color:var(--green2); }
+.fqi {
+  width:22px; height:22px; border-radius:50%;
+  border:0.5px solid var(--border);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  font-size:15px; color:var(--green); transition:all .3s; line-height:1;
+}
+.fq.open .fqi { background:var(--green); border-color:var(--green); color:var(--white); transform:rotate(45deg); }
+.fqa { font-size:13px; color:var(--muted); line-height:1.85; max-height:0; overflow:hidden; transition:max-height .35s ease, padding .3s; font-weight:400; }
+.fq.open .fqa { max-height:220px; padding-bottom:18px; }
+
+/* CTA */
+#contato {
+  background:var(--navy); padding:96px 64px;
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  position:relative; overflow:hidden;
+}
+.cta-sym { margin-bottom:32px; position:relative; z-index:1; }
+.cta-t {
+  font-family:'Playfair Display', serif;
+  font-size:clamp(32px,4vw,56px); font-weight:900; color:var(--white);
+  line-height:1.08; letter-spacing:-.02em; position:relative; z-index:1;
+}
+.cta-t em { font-style:italic; color:var(--green); }
+.cta-s {
+  font-family:'Inter', sans-serif; font-size:15px;
+  color:rgba(255,255,255,.5); margin-top:14px; max-width:400px;
+  line-height:1.75; position:relative; z-index:1;
+}
+.cta-form { display:flex; gap:10px; margin-top:36px; position:relative; z-index:1; flex-wrap:wrap; justify-content:center; }
+.cta-in {
+  padding:13px 20px; border-radius:8px;
+  border:0.5px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.06); color:var(--white);
+  font-family:'Inter', sans-serif; font-size:14px; font-weight:400; width:280px;
+  outline:none; transition:border-color .2s;
+}
+.cta-in::placeholder { color:rgba(255,255,255,.3); }
+.cta-in:focus { border-color:var(--green); }
+.btn-green {
+  background:var(--green); color:var(--white);
+  padding:13px 28px; border-radius:8px; font-size:13.5px;
+  font-weight:700; cursor:pointer; border:none;
+  font-family:'Inter', sans-serif; letter-spacing:.01em;
+  transition:background .2s, transform .15s;
+}
+.btn-green:hover { background:var(--green2); transform:translateY(-1px); }
+.cta-disc { font-size:11px; color:rgba(255,255,255,.22); margin-top:14px; position:relative; z-index:1; font-style:italic; font-family:'Playfair Display', serif; }
+
+/* FOOTER */
+footer { background:var(--offwhite2); padding:52px 64px 28px; border-top:0.5px solid var(--border); }
+.fg { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:48px; margin-bottom:40px; }
+.fb-desc { font-family:'Inter', sans-serif; font-size:12.5px; color:var(--muted); line-height:1.75; margin-top:12px; max-width:220px; }
+.fc h4 { font-size:9.5px; font-weight:700; color:var(--muted); letter-spacing:.18em; text-transform:uppercase; margin-bottom:16px; }
+.fc a { display:block; font-size:13px; color:var(--muted); text-decoration:none; margin-bottom:8px; transition:color .2s; font-weight:500; }
+.fc a:hover { color:var(--navy); }
+.fbot { border-top:0.5px solid var(--border); padding-top:20px; display:flex; justify-content:space-between; }
+.fbot p { font-size:11px; color:var(--muted); }
+.fbot a { color:var(--green2); text-decoration:none; }
+
+@media(max-width:960px){
+  nav{padding:0 20px;} .nlinks{display:none;}
+  .sec{padding:64px 20px;} #hero{padding:90px 20px 60px;}
+  .hcol,.dig-inner{grid-template-columns:1fr;gap:36px;}
+  .hvisual{display:none;}
+  .stats-bar{grid-template-columns:1fr 1fr;padding:24px 20px;gap:20px;}
+  .sb-item+.sb-item{border-left:none;border-top:0.5px solid rgba(255,255,255,.1);}
+  .fw-grid{grid-template-columns:1fr 1fr;}
+  .srv-grid,.tgrid{grid-template-columns:1fr;}
+  .how-grid{grid-template-columns:1fr 1fr;gap:24px;} .how-grid::before{display:none;}
+  .fg{grid-template-columns:1fr 1fr;gap:24px;}
+  footer,#contato{padding-left:20px;padding-right:20px;}
+  .cta-form{flex-direction:column;align-items:center;}
+  .cta-in{width:100%;max-width:320px;}
+}
+</style>
+</head>
+<body>
+
+<div class="cur"  id="cur"></div>
+<div class="curR" id="curR"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nlogo">
+    <div class="sym">
+      <div class="sym-bar" style="width:22px;height:8px;background:#9aa5b4"></div>
+      <div class="sym-bar" style="width:30px;height:11px;background:#3aaa62"></div>
+      <div class="sym-bar" style="width:27px;height:11px;background:#2e9254"></div>
+    </div>
+    <div class="nsep"></div>
+    <div>
+      <div class="nname">RAIM</div>
+      <div class="ntag">Marcas e Domínios</div>
+    </div>
+  </a>
+  <div class="nlinks">
+    <a href="#para-quem">Para quem</a>
+    <a href="#servicos">Serviços</a>
+    <a href="#como">Como funciona</a>
+    <a href="#faq">FAQ</a>
+    <a href="#contato" class="ncta">Falar com especialista</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-sym">
+    <div class="hero-sym-bar" style="width:200px;height:70px"></div>
+    <div class="hero-sym-bar" style="width:280px;height:96px"></div>
+    <div class="hero-sym-bar" style="width:250px;height:96px"></div>
+  </div>
+  <div class="hcol">
+    <div class="htext rv">
+      <div class="hbadge"><span class="hbadge-dot"></span>Proteção para o mercado digital</div>
+      <h1>Sua marca.<br>Seu nome.<br><em>Sua proteção.</em></h1>
+      <p class="hsub">Registro de marcas no INPI e domínios para quem cria, empreende e constrói no digital e no mundo real.</p>
+      <div class="hfor">
+        <span class="hpill">Criadores de conteúdo</span>
+        <span class="hpill">Infoprodutores</span>
+        <span class="hpill">Startups</span>
+        <span class="hpill">Marcas pessoais</span>
+        <span class="hpill">Autônomos</span>
+      </div>
+      <div class="hact">
+        <a href="#contato" class="btn-primary">Verificar disponibilidade</a>
+        <a href="#servicos" class="btn-secondary">Ver serviços</a>
+      </div>
+    </div>
+    <div class="hvisual rv d2">
+      <div class="hv-title">O que você protege</div>
+      <div class="hv-item">
+        <div class="hv-left">
+          <div class="hv-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 2C4.68 2 2 4.68 2 8s2.68 6 6 6 6-2.68 6-6-2.68-6-6-6z" stroke="#3aaa62" stroke-width="1.3"/><path d="M2 8h12M8 2c-1.5 2-2.5 3.8-2.5 6s1 4 2.5 6M8 2c1.5 2 2.5 3.8 2.5 6s-1 4-2.5 6" stroke="#3aaa62" stroke-width="1"/></svg></div>
+          <div><div class="hv-name">Nome da marca</div><div class="hv-desc">Texto, logo ou combinação</div></div>
+        </div>
+        <span class="hv-badge ok">Protegível</span>
+      </div>
+      <div class="hv-item">
+        <div class="hv-left">
+          <div class="hv-icon"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="#3aaa62" stroke-width="1.3"/><path d="M5 8h6M5 6h4" stroke="#3aaa62" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+          <div><div class="hv-name">Domínio .com.br</div><div class="hv-desc">Presença digital exclusiva</div></div>
+        </div>
+        <span class="hv-badge ok">Registrável</span>
+      </div>
+      <div class="hv-item">
+        <div class="hv-left">
+          <div class="hv-icon"><svg viewBox="0 0 16 16" fill="none"><rect x="4" y="7" width="8" height="7" rx="1.5" stroke="#3aaa62" stroke-width="1.3"/><path d="M5.5 7V5.5a2.5 2.5 0 015 0V7" stroke="#3aaa62" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+          <div><div class="hv-name">Símbolo ™</div><div class="hv-desc">Desde o protocolo</div></div>
+        </div>
+        <span class="hv-badge go">Imediato</span>
+      </div>
+      <div class="hv-item">
+        <div class="hv-left">
+          <div class="hv-icon"><svg viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 4h4l-3 2.5 1 4L8 10l-3.5 2.5 1-4L2 6h4z" stroke="#3aaa62" stroke-width="1.3" stroke-linejoin="round"/></svg></div>
+          <div><div class="hv-name">Uso exclusivo</div><div class="hv-desc">No seu segmento de mercado</div></div>
+        </div>
+        <span class="hv-badge ok">Garantido</span>
+      </div>
+      <p class="hv-note">Aprovação sujeita à análise do INPI</p>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="sb-item"><div class="sb-n">+35</div><div class="sb-l">Registros realizados</div></div>
+  <div class="sb-item"><div class="sb-n">Brasil</div><div class="sb-l">Clientes em todo o país</div></div>
+  <div class="sb-item"><div class="sb-n">100%</div><div class="sb-l">Processo online</div></div>
+  <div class="sb-item"><div class="sb-n">24h</div><div class="sb-l">Retorno garantido</div></div>
+</div>
+
+<!-- PARA QUEM -->
+<section id="para-quem" class="sec sec-white">
+  <div class="rv"><div class="label">Para quem é a RAIM</div></div>
+  <div class="rv d1"><h2 class="dark">Feito para quem cria<br>e <em>constrói</em></h2></div>
+  <div class="fw-grid">
+    <div class="fw-card rv d1">
+      <div class="fw-ic"><svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="6" r="3.5" stroke="#3aaa62" stroke-width="1.4"/><path d="M2 17c0-3.5 3.1-6 7-6s7 2.5 7 6" stroke="#3aaa62" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+      <div class="fw-t">Marcas Pessoais</div>
+      <div class="fw-d">Seu nome é seu ativo mais valioso. Proteja antes que outra pessoa registre.</div>
+    </div>
+    <div class="fw-card rv d2">
+      <div class="fw-ic"><svg viewBox="0 0 18 18" fill="none"><rect x="2" y="4" width="14" height="10" rx="2" stroke="#3aaa62" stroke-width="1.4"/><path d="M6 4V3a1 1 0 011-1h4a1 1 0 011 1v1M9 9v3M7 11h4" stroke="#3aaa62" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+      <div class="fw-t">Infoprodutores</div>
+      <div class="fw-d">Cursos, mentorias, plataformas. Sua marca é o que garante autoridade no mercado.</div>
+    </div>
+    <div class="fw-card rv d3">
+      <div class="fw-ic"><svg viewBox="0 0 18 18" fill="none"><path d="M2 13L6 6l4 5 3-4 3 6" stroke="#3aaa62" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="fw-t">Startups</div>
+      <div class="fw-d">Antes de lançar, antes de captar. Registro de marca faz parte do seu pitch.</div>
+    </div>
+    <div class="fw-card rv d4">
+      <div class="fw-ic"><svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="#3aaa62" stroke-width="1.4"/><path d="M3 9h12M9 3c-2 2.5-3 4.5-3 6s1 3.5 3 6M9 3c2 2.5 3 4.5 3 6s-1 3.5-3 6" stroke="#3aaa62" stroke-width="1.1" stroke-linecap="round"/></svg></div>
+      <div class="fw-t">Influenciadores</div>
+      <div class="fw-d">Sua audiência é construída em cima do seu nome. Torne isso juridicamente seu.</div>
+    </div>
+    <div class="fw-card rv d1">
+      <div class="fw-ic"><svg viewBox="0 0 18 18" fill="none"><path d="M5 6h8M5 10h5" stroke="#3aaa62" stroke-width="1.4" stroke-linecap="round"/><rect x="2" y="3" width="14" height="12" rx="2" stroke="#3aaa62" stroke-width="1.4"/></svg></div>
+      <div class="fw-t">Autônomos</div>
+      <div class="fw-d">Designer, coach, terapeuta. Seu nome de trabalho pode e deve ser registrado.</div>
+    </div>
+    <div class="fw-card rv d2">
+      <div class="fw-ic"><svg viewBox="0 0 18 18" fill="none"><path d="M3 14l4-7 3 4.5 2.5-3.5L15 14" stroke="#3aaa62" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="fw-t">Negócios Tradicionais</div>
+      <div class="fw-d">Lojas, clínicas, academias. Qualquer negócio com nome próprio merece proteção.</div>
+    </div>
+    <div class="fw-card rv d3">
+      <div class="fw-ic"><svg viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="6" height="6" rx="1.5" stroke="#3aaa62" stroke-width="1.4"/><rect x="10" y="2" width="6" height="6" rx="1.5" stroke="#3aaa62" stroke-width="1.4"/><rect x="2" y="10" width="6" height="6" rx="1.5" stroke="#3aaa62" stroke-width="1.4"/><rect x="10" y="10" width="6" height="6" rx="1.5" stroke="#3aaa62" stroke-width="1.4"/></svg></div>
+      <div class="fw-t">Agências e Studios</div>
+      <div class="fw-d">Sua marca guarda-chuva e submarcas protegidas para escalar com segurança.</div>
+    </div>
+    <div class="fw-card rv d4">
+      <div class="fw-ic"><svg viewBox="0 0 18 18" fill="none"><path d="M9 2l1.5 5h5l-4 3 1.5 5L9 12l-4 3 1.5-5-4-3h5z" stroke="#3aaa62" stroke-width="1.4" stroke-linejoin="round"/></svg></div>
+      <div class="fw-t">Quem está começando</div>
+      <div class="fw-d">O melhor momento para registrar é agora, antes que a marca cresça e vire disputa.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="servicos" class="sec sec-light">
+  <div class="rv"><div class="label">Nossos serviços</div></div>
+  <div class="rv d1"><h2 class="dark">Escolha como quer<br>ser <em>protegido</em></h2></div>
+  <p class="sub-text rv d2">Dois caminhos: você conduz com nossa orientação, ou a gente cuida de tudo. Nos dois casos, você sai protegido.</p>
+  <div class="srv-grid">
+    <div class="srv-card rv d1">
+      <div class="srv-accent"></div>
+      <span class="srv-tag green">Domínio</span>
+      <div class="srv-title">Registre seu espaço online</div>
+      <div class="srv-desc">Verificamos disponibilidade e registramos seu .com.br e .com. Sua presença digital começa aqui.</div>
+      <ul class="srv-inc">
+        <li>Verificação de disponibilidade</li>
+        <li>Registro .com.br e/ou .com</li>
+        <li>Configuração básica de DNS</li>
+        <li>Renovação anual assistida</li>
+      </ul>
+      <div class="srv-note">Recomendamos registrar o domínio junto com a marca para proteção completa.</div>
+      <a href="#contato" class="srv-cta">Registrar domínio →</a>
+    </div>
+    <div class="srv-card rv d2">
+      <div class="srv-accent"></div>
+      <span class="srv-tag green">Registro orientado</span>
+      <div class="srv-title">Registro no INPI com nossa orientação</div>
+      <div class="srv-desc">Você conduz o processo com suporte especializado em cada etapa. Ideal para quem quer se envolver e economizar.</div>
+      <ul class="srv-inc">
+        <li>Busca de disponibilidade no INPI</li>
+        <li>Definição da classe correta</li>
+        <li>Orientação para protocolo</li>
+        <li>Suporte por 60 dias após envio</li>
+      </ul>
+      <div class="srv-note">Resultado sujeito à análise do INPI. Trabalhamos para maximizar suas chances.</div>
+      <a href="#contato" class="srv-cta">Quero orientação →</a>
+    </div>
+    <div class="srv-card highlight rv d3">
+      <div class="srv-accent" style="background:var(--green)"></div>
+      <span class="srv-tag dark">Suporte completo</span>
+      <div class="srv-title">Cuidamos de tudo até o certificado</div>
+      <div class="srv-desc">Da busca ao protocolo, acompanhamento de publicações, resposta a oposições e gestão completa até o fim.</div>
+      <ul class="srv-inc">
+        <li>Busca completa no INPI</li>
+        <li>Protocolo realizado por nós</li>
+        <li>Acompanhamento de todas as fases</li>
+        <li>Resposta a oposições</li>
+        <li>Notificação em cada etapa</li>
+        <li>Suporte até o certificado final</li>
+      </ul>
+      <div class="srv-note">Resultado sujeito à análise do INPI. O acompanhamento completo aumenta as chances de aprovação.</div>
+      <a href="#contato" class="srv-cta">Quero suporte completo →</a>
+    </div>
+    <div class="srv-card rv d4" style="border-style:dashed;">
+      <div class="srv-accent"></div>
+      <span class="srv-tag green">Pacote</span>
+      <div class="srv-title">Marca + Domínio</div>
+      <div class="srv-desc">Proteção nos dois mundos em um só processo. Registro da marca no INPI e seu domínio juntos.</div>
+      <ul class="srv-inc">
+        <li>Registro de marca (orientado ou completo)</li>
+        <li>Registro de domínio .com.br e .com</li>
+        <li>Gestão unificada dos dois processos</li>
+        <li>Melhor custo-benefício</li>
+      </ul>
+      <div class="srv-note">A opção mais completa para blindar a marca em todas as frentes.</div>
+      <a href="#contato" class="srv-cta">Falar sobre o pacote →</a>
+    </div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section id="como" class="sec sec-white">
+  <div class="rv"><div class="label">Processo simples</div></div>
+  <div class="rv d1"><h2 class="dark">Do zero ao<br><em>registro feito</em></h2></div>
+  <div class="how-grid">
+    <div class="how-step rv d1">
+      <div class="how-n">01</div>
+      <div class="how-t">Nos conte sua ideia</div>
+      <div class="how-d">Fale sobre seu negócio e o nome que quer proteger.</div>
+    </div>
+    <div class="how-step rv d2">
+      <div class="how-n">02</div>
+      <div class="how-t">Verificamos disponibilidade</div>
+      <div class="how-d">Buscamos no INPI e nos domínios antes de qualquer passo.</div>
+    </div>
+    <div class="how-step rv d3">
+      <div class="how-n">03</div>
+      <div class="how-t">Você escolhe o caminho</div>
+      <div class="how-d">Orientado ou suporte completo. Você decide o nível de envolvimento.</div>
+    </div>
+    <div class="how-step rv d4">
+      <div class="how-n">04</div>
+      <div class="how-t">Acompanhamos juntos</div>
+      <div class="how-d">Atualizações em cada etapa. Símbolo ™ liberado desde o protocolo.</div>
+    </div>
+  </div>
+</section>
+
+<!-- DIGITAL -->
+<section class="sec sec-light">
+  <div class="dig-inner">
+    <div class="rv">
+      <div class="label">Foco no digital</div>
+      <h2 class="dark">Para quem vive e<br><em>vende online</em></h2>
+      <div class="dig-list">
+        <div class="dig-item">
+          <div class="dig-ck"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3" stroke="#3aaa62" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div><div class="dig-it">Processo 100% online</div><div class="dig-id">Tudo pelo celular ou computador, sem reuniões presenciais.</div></div>
+        </div>
+        <div class="dig-item">
+          <div class="dig-ck"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3" stroke="#3aaa62" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div><div class="dig-it">Linguagem humana</div><div class="dig-id">Sem juridiquês. Você entende cada passo e por que ele importa.</div></div>
+        </div>
+        <div class="dig-item">
+          <div class="dig-ck"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3" stroke="#3aaa62" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div><div class="dig-it">Transparência total</div><div class="dig-id">Você sabe o que está sendo feito, quando e por quê.</div></div>
+        </div>
+        <div class="dig-item">
+          <div class="dig-ck"><svg viewBox="0 0 12 12" fill="none"><path d="M2 6l2.5 2.5L10 3" stroke="#3aaa62" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div><div class="dig-it">Clientes de Norte a Sul</div><div class="dig-id">Atendemos empreendedores de todos os estados do Brasil.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="dig-card rv d2">
+      <div class="dig-card-title">O que você protege</div>
+      <div class="dc-item">
+        <div class="dc-dot"></div>
+        <div><div class="dc-t">Nome ou marca pessoal</div><div class="dc-s">Texto, logo ou combinação</div></div>
+        <div class="dc-ok"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-6" stroke="#3aaa62" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="dc-item">
+        <div class="dc-dot"></div>
+        <div><div class="dc-t">Domínio .com.br</div><div class="dc-s">Endereço digital exclusivo</div></div>
+        <div class="dc-ok"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-6" stroke="#3aaa62" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="dc-item">
+        <div class="dc-dot"></div>
+        <div><div class="dc-t">Direito de uso exclusivo</div><div class="dc-s">No seu segmento de mercado</div></div>
+        <div class="dc-ok"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-6" stroke="#3aaa62" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="dc-item">
+        <div class="dc-dot"></div>
+        <div><div class="dc-t">Símbolo ™ imediato</div><div class="dc-s">Desde o protocolo do pedido</div></div>
+        <div class="dc-ok"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-6" stroke="#3aaa62" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="dc-item">
+        <div class="dc-dot"></div>
+        <div><div class="dc-t">Base para contratos e licenças</div><div class="dc-s">Franquias, parcerias, investimentos</div></div>
+        <div class="dc-ok"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-6" stroke="#3aaa62" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="sec sec-white">
+  <div class="rv"><div class="label">Quem já protegeu</div></div>
+  <div class="rv d1"><h2 class="dark">Marcas que já<br>estão <em>seguras</em></h2></div>
+  <div class="tgrid">
+    <div class="tc rv d1">
+      <div class="tc-stars">★★★★★</div>
+      <div class="tc-text">"Lancei meu curso e não sabia que precisava registrar a marca. A RAIM me explicou tudo com calma e cuidou de todo o processo."</div>
+      <div class="tc-author"><div class="tc-av">MF</div><div><div class="tc-name">Marina Fonseca</div><div class="tc-role">Infoprodutora · SP</div></div></div>
+    </div>
+    <div class="tc rv d2">
+      <div class="tc-stars">★★★★★</div>
+      <div class="tc-text">"Minha marca pessoal cresceu e alguém tentou usar meu nome. Por sorte já estava registrado. Valeu cada centavo investido."</div>
+      <div class="tc-author"><div class="tc-av">RL</div><div><div class="tc-name">Ricardo Lopes</div><div class="tc-role">Coach · RJ</div></div></div>
+    </div>
+    <div class="tc rv d3">
+      <div class="tc-stars">★★★★★</div>
+      <div class="tc-text">"Processo todo online, super rápido. Registrei a marca da minha startup antes do lançamento. Hoje está no nosso deck para investidores."</div>
+      <div class="tc-author"><div class="tc-av">JB</div><div><div class="tc-name">Julia Bastos</div><div class="tc-role">CEO, Fintech · MG</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="sec sec-light">
+  <div style="text-align:center;">
+    <div class="rv"><div class="label" style="display:inline-flex">Dúvidas frequentes</div></div>
+    <div class="rv d1"><h2 class="dark">Perguntas frequentes</h2></div>
+  </div>
+  <div class="faq-wrap rv d2">
+    <div class="fq">
+      <button class="fqb" onclick="faq(this)">Qual a diferença entre registro orientado e suporte completo?<span class="fqi">+</span></button>
+      <div class="fqa">No orientado, você conduz o processo no INPI com nossa ajuda em cada etapa. No suporte completo, a RAIM assume tudo: protocola por você, acompanha publicações, responde oposições e monitora até o certificado. Você só recebe as atualizações.</div>
+    </div>
+    <div class="fq">
+      <button class="fqb" onclick="faq(this)">Vocês garantem a aprovação da minha marca?<span class="fqi">+</span></button>
+      <div class="fqa">Não garantimos e desconfie de quem promete isso. O INPI é quem decide. O que fazemos é uma busca criteriosa antes do protocolo e conduzimos o processo da melhor forma para maximizar suas chances.</div>
+    </div>
+    <div class="fq">
+      <button class="fqb" onclick="faq(this)">Quanto tempo leva o processo?<span class="fqi">+</span></button>
+      <div class="fqa">O processo no INPI leva em média de 12 a 18 meses. Mas desde o protocolo você já pode usar o símbolo ™ e tem prioridade sobre o nome. Você já está protegido antes do certificado sair.</div>
+    </div>
+    <div class="fq">
+      <button class="fqb" onclick="faq(this)">Preciso de CNPJ para registrar uma marca?<span class="fqi">+</span></button>
+      <div class="fqa">Não. Pessoas físicas registram pelo CPF. Isso é fundamental para influenciadores, autônomos e marcas pessoais que ainda não têm empresa aberta.</div>
+    </div>
+    <div class="fq">
+      <button class="fqb" onclick="faq(this)">O que é a classe do registro?<span class="fqi">+</span></button>
+      <div class="fqa">O INPI organiza marcas em classes por produtos e serviços. A proteção vale dentro dessas classes. Nossa orientação inclui ajudar você a identificar as classes certas para o seu negócio.</div>
+    </div>
+    <div class="fq">
+      <button class="fqb" onclick="faq(this)">E se minha marca for contestada?<span class="fqi">+</span></button>
+      <div class="fqa">No suporte completo, a RAIM acompanha e responde oposições durante o período de publicação. Analisamos, elaboramos a resposta e conduzimos a defesa da sua marca.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="contato">
+  <div class="cta-sym">
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+      <div style="width:42px;height:15px;border-radius:0 50% 50% 0;background:rgba(255,255,255,0.2)"></div>
+      <div style="width:58px;height:20px;border-radius:0 50% 50% 0;background:#3aaa62"></div>
+      <div style="width:52px;height:20px;border-radius:0 50% 50% 0;background:#2e9254"></div>
+    </div>
+  </div>
+  <h2 class="cta-t">Comece agora.<br><em>Seu nome espera.</em></h2>
+  <p class="cta-s">Deixe seu contato e um especialista fala com você em até 24h, sem compromisso.</p>
+  <div class="cta-form">
+    <input class="cta-in" type="text" placeholder="Seu nome ou e-mail">
+    <button class="btn-green">Falar com especialista</button>
+  </div>
+  <p class="cta-disc">Sem spam. Sem compromisso. Só uma conversa.</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="fg">
+    <div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="sym">
+          <div class="sym-bar" style="width:20px;height:7px;background:#9aa5b4"></div>
+          <div class="sym-bar" style="width:27px;height:10px;background:#3aaa62"></div>
+          <div class="sym-bar" style="width:24px;height:10px;background:#2e9254"></div>
+        </div>
+        <div style="width:1px;height:22px;background:var(--border);"></div>
+        <div>
+          <div style="font-family:'Inter',sans-serif;font-size:16px;font-weight:800;color:var(--navy);letter-spacing:.02em;">RAIM</div>
+          <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:8px;color:var(--green);">Marcas e Domínios</div>
+        </div>
+      </div>
+      <p class="fb-desc">Proteção de marcas e domínios para quem cria, empreende e constrói no digital e no mundo real.</p>
+    </div>
+    <div class="fc">
+      <h4>Serviços</h4>
+      <a href="#">Registro de marca</a>
+      <a href="#">Registro de domínio</a>
+      <a href="#">Suporte completo</a>
+      <a href="#">Pacote marca + domínio</a>
+    </div>
+    <div class="fc">
+      <h4>Empresa</h4>
+      <a href="#">Sobre a RAIM</a>
+      <a href="#">Como funciona</a>
+      <a href="#">Para quem é</a>
+      <a href="#">FAQ</a>
+    </div>
+    <div class="fc">
+      <h4>Contato</h4>
+      <a href="#">contato@raim.com.br</a>
+      <a href="#">WhatsApp</a>
+      <a href="#">@raimarcas</a>
+      <a href="#">LinkedIn</a>
+    </div>
+  </div>
+  <div class="fbot">
+    <p>© 2025 RAIM Marcas e Domínios. Todos os direitos reservados.</p>
+    <p><a href="#">Política de Privacidade</a></p>
+  </div>
+</footer>
+
+<script>
+const cur = document.getElementById('cur');
+const curR = document.getElementById('curR');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; cur.style.left=mx+'px'; cur.style.top=my+'px'; });
+(function loop(){ rx+=(mx-rx)*.12; ry+=(my-ry)*.12; curR.style.left=rx+'px'; curR.style.top=ry+'px'; requestAnimationFrame(loop); })();
+window.addEventListener('scroll', () => document.getElementById('nav').classList.toggle('raised', scrollY>40));
+const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add('on'); }), {threshold:.1});
+document.querySelectorAll('.rv').forEach(r => obs.observe(r));
+function faq(btn){
+  const item = btn.parentElement;
+  const open = item.classList.contains('open');
+  document.querySelectorAll('.fq.open').forEach(i => i.classList.remove('open'));
+  if(!open) item.classList.add('open');
+}
+</script>
+</body>
+</html>

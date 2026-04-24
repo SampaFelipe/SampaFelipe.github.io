@@ -475,14 +475,15 @@ footer { background:var(--off2); padding:52px var(--pad) 28px; border-top:1px so
       <div class="popup-badge"><span class="popup-badge-dot"></span>Grátis — sem compromisso</div>
       <h2 class="popup-h">Diagnóstico<br>de <em>marcas</em><br>gratuito</h2>
       <p class="popup-sub">Informe o nome da sua marca. Buscamos no INPI e enviamos o resultado completo de disponibilidade em até 24h — sem custo, sem compromisso.</p>
-      <div class="popup-form">
-        <input class="popup-field" id="pf-marca" type="text" placeholder="Nome da sua marca" oninput="updatePreview(this.value)">
-        <input class="popup-field" id="pf-nome" type="text" placeholder="Seu nome">
-        <input class="popup-field" id="pf-email" type="email" placeholder="Seu e-mail">
-        <input class="popup-field" id="pf-wpp" type="tel" placeholder="WhatsApp">
-        <button class="popup-submit" id="popup-btn" onclick="submitDiag()">Quero meu diagnóstico gratuito →</button>
+      <form class="popup-form" id="popup-form" action="https://formspree.io/f/xaqavdrr" method="POST">
+        <input class="popup-field" id="pf-marca" type="text" name="marca" placeholder="Nome da sua marca" oninput="updatePreview(this.value)" required>
+        <input class="popup-field" id="pf-nome" type="text" name="nome" placeholder="Seu nome" required>
+        <input class="popup-field" id="pf-email" type="email" name="email" placeholder="Seu e-mail" required>
+        <input class="popup-field" id="pf-wpp" type="tel" name="whatsapp" placeholder="WhatsApp" required>
+        <input type="hidden" name="origem" value="Popup Diagnóstico">
+        <button class="popup-submit" id="popup-btn" type="submit">Quero meu diagnóstico gratuito →</button>
         <p class="popup-disc">Resultado enviado por e-mail e WhatsApp em até 24h.</p>
-      </div>
+      </form>
     </div>
 
     <!-- RIGHT — painel interativo -->
@@ -927,17 +928,18 @@ footer { background:var(--off2); padding:52px var(--pad) 28px; border-top:1px so
       <p class="cta-sub">Deixe seu contato e um especialista fala com você em até 24h, sem compromisso e sem juridiquês.</p>
     </div>
     <div class="rv d2">
-      <div class="cta-form">
+      <form class="cta-form" id="cta-form" action="https://formspree.io/f/xaqavdrr" method="POST">
+        <input type="hidden" name="origem" value="Formulário de Contato">
         <div class="cta-row">
-          <input class="cta-field" type="text" placeholder="Seu nome">
-          <input class="cta-field" type="email" placeholder="Seu e-mail">
+          <input class="cta-field" type="text" name="nome" placeholder="Seu nome" required>
+          <input class="cta-field" type="email" name="email" placeholder="Seu e-mail" required>
         </div>
-        <input class="cta-field" type="tel" placeholder="WhatsApp">
-        <input class="cta-field" type="text" placeholder="Nome da marca que quer registrar">
-        <textarea class="cta-field" rows="3" placeholder="Conta um pouco sobre o seu negócio" style="resize:none;"></textarea>
-        <button class="cta-submit">Falar com especialista</button>
+        <input class="cta-field" type="tel" name="whatsapp" placeholder="WhatsApp" required>
+        <input class="cta-field" type="text" name="marca" placeholder="Nome da marca que quer registrar" required>
+        <textarea class="cta-field" name="mensagem" rows="3" placeholder="Conta um pouco sobre o seu negócio" style="resize:none;"></textarea>
+        <button class="cta-submit" type="submit">Falar com especialista</button>
         <p class="cta-disc">Sem spam. Sem compromisso. Só uma conversa.</p>
-      </div>
+      </form>
     </div>
   </div>
 </section>
@@ -1053,23 +1055,53 @@ function updatePreview(val){
   },2400);
 }
 
-function submitDiag(){
-  const marca=document.getElementById('pf-marca').value.trim();
-  const nome=document.getElementById('pf-nome').value.trim();
-  const email=document.getElementById('pf-email').value.trim();
-  const wpp=document.getElementById('pf-wpp').value.trim();
-  const btn=document.getElementById('popup-btn');
-  const fields=[document.getElementById('pf-marca'),document.getElementById('pf-nome'),document.getElementById('pf-email'),document.getElementById('pf-wpp')];
-  let ok=true;
-  fields.forEach(f=>{
-    if(!f.value.trim()){f.style.borderColor='rgba(226,75,74,.6)';ok=false;}
-    else{f.style.borderColor='rgba(255,255,255,.1)';}
-  });
-  if(!ok) return;
-  btn.textContent='Enviado! Resultado em até 24h ✓';
-  btn.style.background='#18253c';
-  setTimeout(closePopup,2200);
+/* forms — Formspree via fetch */
+async function sendForm(form, btn, successMsg, onSuccess) {
+  const data = new FormData(form);
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+  try {
+    const res = await fetch('https://formspree.io/f/xaqavdrr', {
+      method: 'POST', body: data, headers: { 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      btn.textContent = successMsg;
+      btn.style.background = '#18253c';
+      if (onSuccess) setTimeout(onSuccess, 2200);
+    } else {
+      btn.textContent = 'Erro ao enviar. Tente novamente.';
+      btn.style.background = '#c0392b';
+      btn.disabled = false;
+      setTimeout(() => { btn.textContent = btn.dataset.orig; btn.style.background = ''; btn.disabled = false; }, 3000);
+    }
+  } catch(e) {
+    btn.textContent = 'Erro ao enviar. Tente novamente.';
+    btn.style.background = '#c0392b';
+    setTimeout(() => { btn.textContent = btn.dataset.orig; btn.style.background = ''; btn.disabled = false; }, 3000);
+  }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  /* popup form */
+  const pForm = document.getElementById('popup-form');
+  const pBtn  = document.getElementById('popup-btn');
+  if (pBtn) pBtn.dataset.orig = pBtn.textContent;
+  if (pForm) pForm.addEventListener('submit', e => {
+    e.preventDefault();
+    sendForm(pForm, pBtn, 'Enviado! Resultado em até 24h ✓', closePopup);
+  });
+
+  /* cta form */
+  const cForm = document.getElementById('cta-form');
+  const cBtn  = cForm ? cForm.querySelector('button[type=submit]') : null;
+  if (cBtn) cBtn.dataset.orig = cBtn.textContent;
+  if (cForm) cForm.addEventListener('submit', e => {
+    e.preventDefault();
+    sendForm(cForm, cBtn, 'Mensagem enviada! Falaremos em breve ✓', null);
+  });
+});
+
+
 </script>
 </body>
 </html>
